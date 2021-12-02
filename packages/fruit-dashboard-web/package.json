@@ -1,0 +1,24 @@
+{
+  "name": "fruit-dashboard-web",
+  "packageManager": "yarn@3.1.1",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "@vueuse/core": "^7.1.2",
+    "bootstrap": "^5.1.3",
+    "chart.js": "^3.6.1",
+    "vue": "^3.2.16",
+    "vue-chart-3": "^3.0.3",
+    "zod": "^3.11.6"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^1.9.3",
+    "typescript": "^4.4.3",
+    "vite": "^2.6.4",
+    "vue-tsc": "^0.3.0"
+  }
+}

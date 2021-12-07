@@ -3,14 +3,11 @@
   "private": true,
   "packageManager": "yarn@3.1.1",
   "scripts": {
-    "build": "yarn workspace fruit-dashboard-server build",
-    "heroku-postbuild": "yarn workspace fruit-dashboard-server prisma generate",
+    "build": "yarn workspaces foreach run build",
+    "heroku-postbuild": "yarn workspace fruit-dashboard-server run prisma generate",
     "start": "yarn workspace fruit-dashboard-server start"
   },
   "workspaces": [
     "packages/*"
-  ],
-  "dependencies": {
-    "zod": "^3.11.6"
-  }
+  ]
 }

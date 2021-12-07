@@ -23,7 +23,7 @@ export const SenseHatCliRawOutput = z.object({
 	angularRate: z.string(),
 	linearAcceleration: z.string(),
 	magneticField: z.string(),
-	ledsUpdated: z.string()
+	ledsUpdated: z.string().optional()
 }).partial();
 export type SenseHatCliRawOutput = z.infer<typeof SenseHatCliRawOutput>;
 
@@ -35,7 +35,7 @@ export const SenseHatCliOutput = z.object({
 	angularRate: z.string().transform(reading => parseVector2D(reading.split(' ')[0])),
 	linearAcceleration: z.string().transform(reading => parseVector2D(reading.split(' ')[0])),
 	magneticField: z.string().transform(reading => parseVector2D(reading.split(' ')[0])),
-	ledsUpdated: z.string().transform(reading => reading === 'OK' ? 'OK' : 'FAILED')
+	ledsUpdated: z.string().transform(reading => reading === 'OK' ? 'OK' : 'FAILED').optional()
 });
 export type SenseHatCliOutput = z.infer<typeof SenseHatCliOutput>;
 

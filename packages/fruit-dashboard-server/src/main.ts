@@ -55,7 +55,7 @@ async function main() {
 			const angularRateJSON = JSON.stringify(sensorData.angularRate);
 			const linearAccelerationJSON = JSON.stringify(sensorData.linearAcceleration);
 			const magneticFieldJSON = JSON.stringify(sensorData.magneticField);
-			const measurement = {...sensorData, angularRate: angularRateJSON, linearAcceleration: linearAccelerationJSON, magneticField: magneticFieldJSON};
+			const measurement = {...sensorData, angularRate: angularRateJSON, linearAcceleration: linearAccelerationJSON, magneticField: magneticFieldJSON, ledsUpdated: undefined};
 
 			try {
 				if (await prisma.measurement.count({where: {measuredAt: {gte: subSeconds(new Date(), 60)}}})) {

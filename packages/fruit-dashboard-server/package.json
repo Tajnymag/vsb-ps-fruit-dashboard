@@ -10,9 +10,6 @@
   "exports": {
     "./": "./dist"
   },
-  "engines": {
-    "node": "17.x"
-  },
   "dependencies": {
     "@prisma/client": "^3.6.0",
     "date-fns": "^2.27.0",

@@ -7,7 +7,9 @@
     "heroku-postbuild": "yarn workspaces foreach --from fruit-dashboard-server -t run build && yarn workspace fruit-dashboard-server run prisma generate",
     "start": "yarn workspace fruit-dashboard-server start"
   },
-  ""
+  "engines": {
+    "node": "17.x"
+  },
   "workspaces": [
     "packages/*"
   ]

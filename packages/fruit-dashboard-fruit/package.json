@@ -1,16 +1,19 @@
 {
-  "name": "fruit-dashboard-types",
+  "name": "fruit-dashboard-fruit",
   "packageManager": "yarn@3.1.1",
-  "private": true,
   "scripts": {
     "build": "tsc"
   },
-  "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "dependencies": {
+    "fruit-dashboard-server": "workspace:^",
+    "socket.io-client": "^4.4.0",
+    "ws": "^8.3.0",
     "zod": "^3.11.6"
   },
   "devDependencies": {
+    "@types/node": "^16.11.11",
     "@types/ws": "^8.2.1",
     "typescript": "^4.5.2"
   }

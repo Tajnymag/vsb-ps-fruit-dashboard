@@ -1,6 +1,9 @@
 # IDE
 .idea/
 
+# generated files
+dist/
+
 # yarn
 .pnp.*
 .yarn/*

@@ -1,1 +1,0 @@
-# fruit-dashboard-types

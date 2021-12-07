@@ -2,6 +2,10 @@
   "license": "MIT",
   "private": true,
   "packageManager": "yarn@3.1.1",
+  "scripts": {
+    "build": "yarn workspace fruit-dashboard-server build",
+    "start": "yarn workspace fruit-dashboard-server start"
+  },
   "workspaces": [
     "packages/*"
   ],

@@ -7,7 +7,6 @@ export interface Vector2D {
 export interface NewSensorData {
 	humidity: number;
 	pressure: number;
-	temperature: number;
 	temperatureFromHumidity: number;
 	temperatureFromPressure: number,
 	angularRate: Vector2D,

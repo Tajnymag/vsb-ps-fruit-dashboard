@@ -17,7 +17,6 @@ function parseVector2D(vectorString: string): Vector2D {
 export const SenseHatCliRawOutput = z.object({
 	humidity: z.string(),
 	pressure: z.string(),
-	temperature: z.string(),
 	temperature_from_humidity: z.string(),
 	temperature_from_pressure: z.string(),
 	angular_rate: z.string(),
@@ -30,7 +29,6 @@ export type SenseHatCliRawOutput = z.infer<typeof SenseHatCliRawOutput>;
 export const SenseHatCliOutput = z.object({
 	humidity: z.string().transform(reading => parseFloat(reading.split(' ')[0])),
 	pressure: z.string().transform(reading => parseFloat(reading.split(' ')[0])),
-	temperature: z.string().transform(reading => parseFloat(reading.split(' ')[0])),
 	temperatureFromHumidity: z.string().transform(reading => parseFloat(reading.split(' ')[0])),
 	temperatureFromPressure: z.string().transform(reading => parseFloat(reading.split(' ')[0])),
 	angularRate: z.string().transform(reading => parseVector2D(reading.split(' ')[0])),

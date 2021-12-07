@@ -29,7 +29,7 @@ async function main() {
 				const sensorData = await senseHatCli.run();
 				socket.send('NEW_SENSOR_DATA', sensorData);
 			} catch (err) {
-				console.error((err as { stdout: string, stderr: string }).stderr);
+				console.error(err);
 			}
 		}, 1000);
 

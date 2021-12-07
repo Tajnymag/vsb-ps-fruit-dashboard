@@ -1,4 +1,5 @@
 import {z} from 'zod';
+import {camelCase} from 'lodash';
 import {execAsync} from "./utils";
 
 export const Vector2D = z.object({
@@ -17,12 +18,12 @@ function parseVector2D(vectorString: string): Vector2D {
 export const SenseHatCliRawOutput = z.object({
 	humidity: z.string(),
 	pressure: z.string(),
-	temperature_from_humidity: z.string(),
-	temperature_from_pressure: z.string(),
-	angular_rate: z.string(),
-	linear_acceleration: z.string(),
-	magnetic_scale: z.string(),
-	leds_updated: z.string()
+	temperatureFromHumidity: z.string(),
+	temperatureFromPressure: z.string(),
+	angularRate: z.string(),
+	linearAcceleration: z.string(),
+	magneticField: z.string(),
+	ledsUpdated: z.string()
 }).partial();
 export type SenseHatCliRawOutput = z.infer<typeof SenseHatCliRawOutput>;
 
@@ -51,7 +52,7 @@ export class SenseHatCli {
 
 		const measurement = lines.reduce((acc, line) => {
 			const [key, reading] = line.split('\t');
-			acc[key as keyof SenseHatCliRawOutput] = reading;
+			acc[key as keyof SenseHatCliRawOutput] = camelCase(reading);
 			return acc;
 		}, {} as SenseHatCliRawOutput);
 

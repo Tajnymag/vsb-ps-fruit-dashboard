@@ -3,7 +3,7 @@
   "private": true,
   "packageManager": "yarn@3.1.1",
   "scripts": {
-    "build": "yarn workspaces foreach run build",
+    "build": "yarn workspaces foreach -pt run build",
     "heroku-postbuild": "yarn workspace fruit-dashboard-server run prisma generate",
     "start": "yarn workspace fruit-dashboard-server start"
   },

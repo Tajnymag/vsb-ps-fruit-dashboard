@@ -52,7 +52,7 @@ export class SenseHatCli {
 
 		const measurement = lines.reduce((acc, line) => {
 			const [key, reading] = line.split('\t');
-			acc[key as keyof SenseHatCliRawOutput] = camelCase(reading);
+			acc[camelCase(key) as keyof SenseHatCliRawOutput] = reading;
 			return acc;
 		}, {} as SenseHatCliRawOutput);
 

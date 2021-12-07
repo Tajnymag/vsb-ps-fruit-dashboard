@@ -24,8 +24,13 @@ const allowedIps = [
 
 async function main() {
 	const prisma = new PrismaClient();
-	const port = parseInt(process.env.port as string) || 3000;
-	const server = new Server(port);
+	const port = parseInt(process.env.PORT as string) || 3000;
+	const server = new Server(port,{
+		cors: {
+			origin: ["https://vsb-fruit-dashboard.netlify.app"],
+			methods: ["GET", "POST"],
+		}
+	});
 
 	const fruits: Namespace<FruitToServerEvents, ServerToFruitEvents, DefaultEventsMap, FruitSocketData> = server.of('fruit');
 	const browsers: Namespace<BrowserToServerEvents, ServerToBrowserEvents> = server.of('web');

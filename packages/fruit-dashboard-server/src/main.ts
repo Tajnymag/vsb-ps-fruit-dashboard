@@ -13,7 +13,6 @@ import {
 	ServerToBrowserEvents,
 	ServerToFruitEvents
 } from "./types";
-import {Address} from "cluster";
 
 const allowedIps = [
 	'158.196.22.216',
@@ -42,7 +41,8 @@ async function main() {
 		const fruitIp = socket.handshake.query.fruitIp;
 
 		if (!fruitIp || typeof fruitIp !== 'string' || !allowedIps.includes(fruitIp)) {
-			socket.disconnect();
+			console.warn(`Fruit ${socket.handshake.address} is being disconnected due to not providing a valid fruit IP!`);
+			socket.disconnect(true);
 			return;
 		}
 
@@ -50,14 +50,20 @@ async function main() {
 		socket.data.order = allowedIps.indexOf(fruitIp);
 
 		socket.on('NEW_SENSOR_DATA', async sensorData => {
+			console.log(`Got a fresh new set of data from fruit ${socket.data.fruitIp}`);
+
 			const angularRateJSON = JSON.stringify(sensorData.angularRate);
 			const linearAccelerationJSON = JSON.stringify(sensorData.linearAcceleration);
 			const magneticFieldJSON = JSON.stringify(sensorData.magneticField);
 			const measurement = {...sensorData, angularRate: angularRateJSON, linearAcceleration: linearAccelerationJSON, magneticField: magneticFieldJSON};
 
-			if (await prisma.measurement.count({where: {measuredAt: {gte: subSeconds(new Date(), 60)}}})) {
-				await prisma.measurement.deleteMany({where: {measuredAt: {lte: subHours(new Date(), 2)}}});
-				await prisma.measurement.create({data: measurement});
+			try {
+				if (await prisma.measurement.count({where: {measuredAt: {gte: subSeconds(new Date(), 60)}}})) {
+					await prisma.measurement.deleteMany({where: {measuredAt: {lte: subHours(new Date(), 2)}}});
+					await prisma.measurement.create({data: measurement});
+				}
+			} catch (err) {
+				console.error('Could not store measurements to the database!');
 			}
 
 			browsers.emit('NEW_SENSOR_DATA', sensorData);
@@ -65,14 +71,38 @@ async function main() {
 	});
 
 	browsers.on('connection', socket => {
+		console.log(`A new browser client connected: ${socket.handshake.address}`);
+
 		socket.on('PRINT_TEXT', text => {
+			console.log(`Got a request to print text ${JSON.stringify(text)} on the fruit boards`);
+
 			const bitmapMatrix = renderPixels(text, fonts.sevenPlus);
+
+			// pad to fit to 8x8 displays
+			bitmapMatrix.forEach(row => {
+				while (row.length % 8 !== 0) {
+					row.push(0);
+				}
+			});
+			while (bitmapMatrix.length % 8 !== 0) {
+				const row: 0[] = [];
+				for (let i = 0; i < bitmapMatrix[0].length; ++i) row.push(0);
+				bitmapMatrix.push(row);
+			}
+
 			const coloredMatrix = bitmapMatrix.map(line => line.map(bit => bit ? [255, 255, 255] : [0, 0, 0]));
 
 			[...fruits.sockets.values()]
 				.sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0))
 				.forEach((fruit, index) => {
-					const coloredPixelArray = coloredMatrix.map(row => row.slice(index * 8, index * 8 + 8)).flat(2);
+					const from = index * 8;
+					const to = from + 8;
+
+					if (from >= coloredMatrix[0].length) return;
+
+					const coloredPixelArray = coloredMatrix.map(row => row.slice(from, to)).flat(2);
+
+					console.log(`Fruit ${socket.data.fruitIp} priting:\n${coloredPixelArray}`);
 					fruit.emit('UPDATE_LEDS', coloredPixelArray);
 				});
 		});

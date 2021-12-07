@@ -1,7 +1,8 @@
+import {createServer} from "http";
 import {PrismaClient} from '@prisma/client';
 import {DefaultEventsMap} from "socket.io/dist/typed-events";
 import {Namespace, Server} from 'socket.io';
-import {subHours, subSeconds} from 'date-fns';
+import {subHours, subSeconds} from 'date-fns'
 
 import {fonts, renderPixels} from "js-pixel-fonts";
 
@@ -12,6 +13,7 @@ import {
 	ServerToBrowserEvents,
 	ServerToFruitEvents
 } from "./types";
+import {Address} from "cluster";
 
 const allowedIps = [
 	'158.196.22.216',
@@ -25,15 +27,16 @@ const allowedIps = [
 async function main() {
 	const prisma = new PrismaClient();
 	const port = parseInt(process.env.PORT as string) || 3000;
-	const server = new Server(port,{
+	const httpServer = createServer();
+	const socketServer = new Server(httpServer, {
 		cors: {
 			origin: ["https://vsb-fruit-dashboard.netlify.app"],
 			methods: ["GET", "POST"],
 		}
 	});
 
-	const fruits: Namespace<FruitToServerEvents, ServerToFruitEvents, DefaultEventsMap, FruitSocketData> = server.of('fruit');
-	const browsers: Namespace<BrowserToServerEvents, ServerToBrowserEvents> = server.of('web');
+	const fruits: Namespace<FruitToServerEvents, ServerToFruitEvents, DefaultEventsMap, FruitSocketData> = socketServer.of('fruit');
+	const browsers: Namespace<BrowserToServerEvents, ServerToBrowserEvents> = socketServer.of('web');
 
 	fruits.on('connection', socket => {
 		const fruitIp = socket.handshake.query.fruitIp;
@@ -73,6 +76,10 @@ async function main() {
 					fruit.emit('UPDATE_LEDS', coloredPixelArray);
 				});
 		});
+	});
+
+	httpServer.listen(port, () => {
+		console.log(`Started listening on port ${port}...`);
 	});
 }
 main().catch(err => console.error(err));

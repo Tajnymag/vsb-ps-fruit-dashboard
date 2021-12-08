@@ -28,7 +28,7 @@ async function main() {
 		timer = setInterval( async() => {
 			try {
 				const sensorData = await senseHatCli.run();
-				socket.emit('NEW_SENSOR_DATA', { ...sensorData, fruitIp, measuredAt: new Date() });
+				socket.emit('NEW_SENSOR_DATA', { ...sensorData, fruitIp: ipv4, measuredAt: new Date() });
 			} catch (err) {
 				console.error(err);
 			}

@@ -4,6 +4,7 @@
 import HelloWorld from './components/HelloWorld.vue'
 import {io, Socket} from 'socket.io-client';
 import {BrowserToServerEvents, ServerToBrowserEvents} from "fruit-dashboard-server";
+import {ref} from "vue";
 
 const socket: Socket<ServerToBrowserEvents, BrowserToServerEvents> = io('https://vsb-fruit-dashboard.herokuapp.com/web');
 
@@ -19,11 +20,16 @@ socket.on('NEW_SENSOR_DATA', sensorData => {
   console.log(sensorData);
 });
 
-socket.emit('PRINT_TEXT', 'ahoj');
+const textToSlide = ref("AHOJ");
+const printText = () => {
+  socket.emit('PRINT_TEXT', 'ahoj');
+}
 </script>
 
 <template>
   <img alt="Vue logo" src="./assets/logo.png" />
+  <input type="text" v-model="textToSlide" />
+  <button @click="printText">Send text</button>
   <HelloWorld msg="Hello Vue 3 + TypeScript + Vite" />
 </template>
 

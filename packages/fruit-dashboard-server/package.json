@@ -3,8 +3,7 @@
   "packageManager": "yarn@3.1.1",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/main.js",
-    "prisma": "prisma"
+    "start": "node dist/main.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

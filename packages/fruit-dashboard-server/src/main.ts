@@ -59,7 +59,8 @@ async function main() {
 			const measurement = {...sensorData, angularRate: angularRateJSON, linearAcceleration: linearAccelerationJSON, magneticField: magneticFieldJSON, ledsUpdated: undefined};
 
 			try {
-				if (await prisma.measurement.count({where: {measuredAt: {gte: subSeconds(new Date(), 60)}}})) {
+				if (await prisma.measurement.count({where: {fruitIp: socket.data.fruitIp, measuredAt: {gte: subSeconds(new Date(), 60)}}}) === 0) {
+					console.log(`Storing measurements for fruit ${socket.data.fruitIp}`);
 					await prisma.measurement.deleteMany({where: {measuredAt: {lte: subHours(new Date(), 2)}}});
 					await prisma.measurement.create({data: measurement});
 				}

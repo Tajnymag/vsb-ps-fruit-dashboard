@@ -18,6 +18,8 @@ socket.on('disconnect', () => {
 socket.on('NEW_SENSOR_DATA', sensorData => {
   console.log(sensorData);
 });
+
+socket.emit('PRINT_TEXT', 'ahoj');
 </script>
 
 <template>

@@ -3,8 +3,8 @@
   "private": true,
   "packageManager": "yarn@3.1.1",
   "scripts": {
-    "netlify-build": "yarn workspaces foreach --from fruit-dashboard-web -pt run build",
-    "heroku-postbuild": "yarn workspaces foreach --from fruit-dashboard-server -t run build && yarn workspace fruit-dashboard-server run prisma generate",
+    "netlify-build": "yarn workspaces foreach --from fruit-dashboard-web -Rpt run build",
+    "heroku-postbuild": "yarn workspaces foreach --from fruit-dashboard-server -Rpt run build && yarn workspace fruit-dashboard-server run prisma generate",
     "start": "yarn workspace fruit-dashboard-server start"
   },
   "engines": {

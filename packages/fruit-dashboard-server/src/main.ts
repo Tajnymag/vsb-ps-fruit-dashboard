@@ -103,7 +103,12 @@ async function main() {
 
 					if (from >= coloredMatrix[0].length) return;
 
-					const coloredPixelArray = coloredMatrix.map(row => row.slice(from, to)).flat(2);
+					const coloredPixelArray = coloredMatrix.slice(0, 8).map(row => row.slice(from, to)).flat(2);
+
+					if (coloredPixelArray.length !== (8 * 8 * 3)) {
+						console.error(`The programmer doesn't know what he's doing so the pixel array for fruit ${socket.data.fruitIp} isn't 64*3 items long -_-`);
+						return;
+					}
 
 					console.log(`Fruit ${socket.data.fruitIp} priting:\n${coloredPixelArray}`);
 					fruit.emit('UPDATE_LEDS', coloredPixelArray);

@@ -22,7 +22,7 @@ socket.on('NEW_SENSOR_DATA', sensorData => {
 
 const textToSlide = ref("AHOJ");
 const printText = () => {
-  socket.emit('PRINT_TEXT', 'ahoj');
+  socket.emit('PRINT_TEXT', textToSlide.value);
 }
 </script>
 

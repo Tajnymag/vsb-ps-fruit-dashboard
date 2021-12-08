@@ -81,6 +81,9 @@ async function main() {
 
 			const bitmapMatrix = renderPixels(text, fonts.sevenPlus);
 
+			// flip Y by 180 degrees due to inverted displays
+			bitmapMatrix.reverse();
+
 			// pad to fit to 8x8 displays
 			bitmapMatrix.forEach(row => {
 				while (row.length % 8 !== 0) {

@@ -44,10 +44,11 @@ async function main() {
 			console.warn(`Fruit ${socket.handshake.address} is being disconnected due to not providing a valid fruit IP!`);
 			socket.disconnect(true);
 			return;
+		} else {
+			console.log(`Fruit ${fruitIp} got connected successfully`);
+			socket.data.fruitIp = fruitIp;
+			socket.data.order = allowedIps.indexOf(fruitIp);
 		}
-
-		socket.data.fruitIp = fruitIp;
-		socket.data.order = allowedIps.indexOf(fruitIp);
 
 		socket.on('NEW_SENSOR_DATA', async sensorData => {
 			console.log(`Got a fresh new set of data from fruit ${socket.data.fruitIp}`);
@@ -63,7 +64,8 @@ async function main() {
 					await prisma.measurement.create({data: measurement});
 				}
 			} catch (err) {
-				console.error('Could not store measurements to the database!');
+				console.error('Could not store measurements in the database!');
+				console.error(err);
 			}
 
 			browsers.emit('NEW_SENSOR_DATA', sensorData);

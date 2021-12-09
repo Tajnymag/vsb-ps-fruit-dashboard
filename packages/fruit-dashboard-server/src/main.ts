@@ -1,7 +1,7 @@
 import {createServer} from "http";
 import {PrismaClient} from '@prisma/client';
 import {DefaultEventsMap} from "socket.io/dist/typed-events";
-import {Namespace, Server} from 'socket.io';
+import {Namespace, Server, Socket} from 'socket.io';
 import {subHours, subSeconds} from 'date-fns'
 
 import {fonts, renderPixels} from "js-pixel-fonts";
@@ -13,6 +13,7 @@ import {
 	ServerToBrowserEvents,
 	ServerToFruitEvents
 } from "./types";
+import {sleep} from "./utils";
 
 const allowedIps = [
 	'158.196.22.216',
@@ -22,6 +23,29 @@ const allowedIps = [
 	'158.196.22.204',
 	'158.196.22.222'
 ];
+
+function printBitmapMatrix(bitmapMatrix: (0|1)[][], sockets: IterableIterator<Socket>) {
+	const coloredMatrix = bitmapMatrix.map(line => line.map(bit => bit ? [255, 255, 255] : [0, 0, 0]));
+
+	[...sockets]
+		.sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0))
+		.forEach((fruit, index) => {
+			const from = index * 8;
+			const to = from + 8;
+
+			if (from >= coloredMatrix[0].length) return;
+
+			const coloredPixelArray = coloredMatrix.slice(0, 8).map(row => row.slice(from, to)).flat(2);
+
+			if (coloredPixelArray.length !== (8 * 8 * 3)) {
+				console.error(`The programmer doesn't know what he's doing so the pixel array for fruit ${fruit.data.fruitIp} isn't 64*3 items long -_-`);
+				return;
+			}
+
+			console.log(`Fruit ${fruit.data.fruitIp} priting:\n${coloredPixelArray}`);
+			fruit.emit('UPDATE_LEDS', coloredPixelArray);
+		});
+}
 
 async function main() {
 	const prisma = new PrismaClient();
@@ -76,7 +100,7 @@ async function main() {
 	browsers.on('connection', socket => {
 		console.log(`A new browser client connected: ${socket.handshake.address}`);
 
-		socket.on('PRINT_TEXT', text => {
+		socket.on('PRINT_TEXT', async text => {
 			console.log(`Got a request to print text ${JSON.stringify(text)} on the fruit boards`);
 
 			const bitmapMatrix = renderPixels(text, fonts.sevenPlus);
@@ -96,26 +120,13 @@ async function main() {
 				bitmapMatrix.push(row);
 			}
 
-			const coloredMatrix = bitmapMatrix.map(line => line.map(bit => bit ? [255, 255, 255] : [0, 0, 0]));
-
-			[...fruits.sockets.values()]
-				.sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0))
-				.forEach((fruit, index) => {
-					const from = index * 8;
-					const to = from + 8;
-
-					if (from >= coloredMatrix[0].length) return;
-
-					const coloredPixelArray = coloredMatrix.slice(0, 8).map(row => row.slice(from, to)).flat(2);
-
-					if (coloredPixelArray.length !== (8 * 8 * 3)) {
-						console.error(`The programmer doesn't know what he's doing so the pixel array for fruit ${fruit.data.fruitIp} isn't 64*3 items long -_-`);
-						return;
-					}
-
-					console.log(`Fruit ${fruit.data.fruitIp} priting:\n${coloredPixelArray}`);
-					fruit.emit('UPDATE_LEDS', coloredPixelArray);
+			for (let i = 0; i < fruits.sockets.size * 8; ++i) {
+				bitmapMatrix.forEach(row => {
+					row.unshift(0);
 				});
+				printBitmapMatrix(bitmapMatrix, fruits.sockets.values());
+				await sleep(500);
+			}
 		});
 	});
 

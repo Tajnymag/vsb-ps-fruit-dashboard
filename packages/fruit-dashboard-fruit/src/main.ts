@@ -32,7 +32,7 @@ async function main() {
 			} catch (err) {
 				console.error('Failed to fetch sensor data correctly. Either sensor-hat-cli binary was not found or humidity/pressure sensor failed its initialization.');
 			}
-		}, 1000);
+		}, 2000);
 
 		socket.on('UPDATE_LEDS', async leds => {
 			try {

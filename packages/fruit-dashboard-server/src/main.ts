@@ -126,7 +126,7 @@ async function main() {
 					row.unshift(0);
 				});
 				printBitmapMatrix(bitmapMatrix, fruits.sockets.values());
-				await sleep(500);
+				await sleep(1000);
 			}
 		});
 	});

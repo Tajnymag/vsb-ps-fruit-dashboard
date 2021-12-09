@@ -115,13 +115,16 @@ async function main() {
 					row.push(0);
 				}
 			});
+
+			const rowLength = bitmapMatrix[0].length;
+
 			while (bitmapMatrix.length % 8 !== 0) {
 				const row: 0[] = [];
-				for (let i = 0; i < bitmapMatrix[0].length; ++i) row.push(0);
+				for (let i = 0; i < rowLength; ++i) row.push(0);
 				bitmapMatrix.push(row);
 			}
 
-			for (let i = 0; i < bitmapMatrix[0].length; ++i) {
+			for (let i = 0; i < rowLength; ++i) {
 				bitmapMatrix.forEach(row => {
 					row.unshift(0);
 				});

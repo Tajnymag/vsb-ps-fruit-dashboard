@@ -29,6 +29,7 @@ const socket: Socket<ServerToBrowserEvents, BrowserToServerEvents> = io('https:/
 
 const textToSlide = ref("AHOJ");
 const sensorDataset = reactive<NewSensorData[]>([]);
+const discoveredFruits = reactive<string[]>([]);
 
 const humidityChartOptions = reactive<ChartOptions<'line'>>({
   responsive: true,
@@ -43,10 +44,10 @@ const humidityChartOptions = reactive<ChartOptions<'line'>>({
   }
 });
 const humidityChartData = computed<ChartData<'line'>>(() => ({
-  datasets: sensorDataset.map(data => (
+  datasets: discoveredFruits.map(fruitIp => (
       {
-        label: data.fruitIp,
-        data: sensorDataset.filter(d => d.fruitIp === data.fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.humidity}))
+        label: fruitIp,
+        data: sensorDataset.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.humidity}))
       }
   ))
 }));
@@ -64,6 +65,9 @@ socket.on('disconnect', () => {
 })
 
 socket.on('NEW_SENSOR_DATA', sensorData => {
+  if (!discoveredFruits.includes(sensorData.fruitIp)) {
+    discoveredFruits.push(sensorData.fruitIp);
+  }
   sensorDataset.push(sensorData);
 });
 </script>

@@ -30,14 +30,18 @@ async function main() {
 				const sensorData = await senseHatCli.run();
 				socket.emit('NEW_SENSOR_DATA', { ...sensorData, fruitIp: ipv4, measuredAt: new Date() });
 			} catch (err) {
-				console.error(err);
+				console.error('Failed to fetch sensor data correctly. Either sensor-hat-cli binary was not found or humidity/pressure sensor failed its initialization.');
 			}
 		}, 1000);
 
 		socket.on('UPDATE_LEDS', async leds => {
-			console.log(`Updating leds...`);
-			await senseHatCli.updateLeds(leds);
-			console.log(`Leds updated successfully`);
+			try {
+				console.log(`Updating leds...`);
+				await senseHatCli.updateLeds(leds);
+				console.log(`Leds updated successfully`);
+			} catch (err) {
+				console.error(`Failed to update leds display`);
+			}
 		})
 	});
 
@@ -55,4 +59,4 @@ async function main() {
 		}, 5000);
 	});
 }
-main().catch(err => console.error(err));
+main().catch(err => { console.error(err); process.exit(1); });

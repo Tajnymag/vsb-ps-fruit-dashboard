@@ -46,8 +46,8 @@ export class SenseHatCli {
 		this.path = path;
 	}
 
-	async run(args?: {leds: number[]}): Promise<SenseHatCliOutput> {
-		const processOutput = args?.leds ? await execAsync(this.path, ['--leds', args.leds.join(' ')]) : await execAsync(this.path);
+	async run(): Promise<SenseHatCliOutput> {
+		const processOutput = await execAsync(this.path);
 		const lines = processOutput.stdout.split('\n');
 
 		const measurement = lines.reduce((acc, line) => {
@@ -59,7 +59,7 @@ export class SenseHatCli {
 		return SenseHatCliOutput.parse(measurement);
 	}
 
-	async updateLeds(leds: number[]): Promise<SenseHatCliOutput> {
-		return this.run({ leds });
+	async updateLeds(leds: number[]): Promise<void> {
+		await execAsync(this.path, ['--leds', leds.join(' '), '--no-sensors']);
 	}
 }

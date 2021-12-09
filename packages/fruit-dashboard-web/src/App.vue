@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import {reactive, ref} from "vue";
+import {ref} from "vue";
 import {io, Socket} from 'socket.io-client';
 import {Chart, registerables} from 'chart.js';
 import {parseJSON} from 'date-fns';
@@ -29,8 +29,8 @@ Chart.register(...registerables);
 const socket: Socket<ServerToBrowserEvents, BrowserToServerEvents> = io('https://vsb-fruit-dashboard.herokuapp.com/web');
 
 const textToSlide = ref("AHOJ");
-const sensorDataset = reactive<NewSensorData[]>([]);
-const discoveredFruits = reactive<string[]>([]);
+const sensorDataset = ref<NewSensorData[]>([]);
+const discoveredFruits = ref<string[]>([]);
 
 const {lineChartProps: humidityChartProps, lineChartRef: humidityChartRef} = useLineChart({
   options: {
@@ -46,10 +46,10 @@ const {lineChartProps: humidityChartProps, lineChartRef: humidityChartRef} = use
     }
   },
   chartData: {
-    datasets: discoveredFruits.map(fruitIp => (
+    datasets: discoveredFruits.value.map(fruitIp => (
         {
           label: fruitIp,
-          data: sensorDataset.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.humidity}))
+          data: sensorDataset.value.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.humidity}))
         }
     ))
   }
@@ -69,10 +69,10 @@ const {lineChartProps: pressureChartProps, lineChartRef: pressureChartRef} = use
     }
   },
   chartData: {
-    datasets: discoveredFruits.map(fruitIp => (
+    datasets: discoveredFruits.value.map(fruitIp => (
         {
           label: fruitIp,
-          data: sensorDataset.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.pressure}))
+          data: sensorDataset.value.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.pressure}))
         }
     ))
   }
@@ -92,10 +92,10 @@ const {lineChartProps: temperatureChartProps, lineChartRef: temperatureChartRef}
     }
   },
   chartData: {
-    datasets: discoveredFruits.map(fruitIp => (
+    datasets: discoveredFruits.value.map(fruitIp => (
         {
           label: fruitIp,
-          data: sensorDataset.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: (d.temperatureFromHumidity + d.temperatureFromPressure) / 2}))
+          data: sensorDataset.value.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: (d.temperatureFromHumidity + d.temperatureFromPressure) / 2}))
         }
     ))
   }
@@ -114,10 +114,10 @@ socket.on('disconnect', () => {
 })
 
 socket.on('NEW_SENSOR_DATA', sensorData => {
-  if (!discoveredFruits.includes(sensorData.fruitIp)) {
-    discoveredFruits.push(sensorData.fruitIp);
+  if (!discoveredFruits.value.includes(sensorData.fruitIp)) {
+    discoveredFruits.value.push(sensorData.fruitIp);
   }
-  sensorDataset.push(sensorData);
+  sensorDataset.value.push(sensorData);
 });
 </script>
 

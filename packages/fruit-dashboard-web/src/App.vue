@@ -8,17 +8,17 @@
     <hr/>
 
     <div class="row">
-      <LineChart v-bind="humidityChartProps"/>
-      <LineChart v-bind="pressureChartProps"/>
-      <LineChart v-bind="temperatureChartProps"/>
+      <LineChart :options="humidityChartOptions" :chartData="humidityChartData"/>
+      <LineChart :options="pressureChartOptions" :chartData="pressureChartData"/>
+      <LineChart :options="temperatureChartOptions" :chartData="temperatureChartData"/>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import {io, Socket} from 'socket.io-client';
-import {Chart, registerables} from 'chart.js';
+import {Chart, ChartData, ChartOptions, registerables} from 'chart.js';
 import {parseJSON} from 'date-fns';
 import 'chartjs-adapter-date-fns';
 import {LineChart, useLineChart} from "vue-chart-3";
@@ -32,74 +32,68 @@ const textToSlide = ref("AHOJ");
 const sensorDataset = ref<NewSensorData[]>([]);
 const discoveredFruits = ref<string[]>([]);
 
-const {lineChartProps: humidityChartProps, lineChartRef: humidityChartRef} = useLineChart({
-  options: {
-    responsive: true,
-    scales: {
-      x: { type: 'timeseries' }
-    },
-    plugins: {
-      title: {
-        display: true,
-        text: 'Tlak'
-      }
-    }
+const humidityChartOptions: ChartOptions<'line'> = {
+  responsive: true,
+  scales: {
+    x: { type: 'timeseries' }
   },
-  chartData: {
-    datasets: discoveredFruits.value.map(fruitIp => (
-        {
-          label: fruitIp,
-          data: sensorDataset.value.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.humidity}))
-        }
-    ))
+  plugins: {
+    title: {
+      display: true,
+      text: 'Vlhkost'
+    }
   }
-});
+};
+const humidityChartData = computed<ChartData<'line'>>(() => ({
+  datasets: discoveredFruits.value.map(fruitIp => (
+      {
+        label: fruitIp,
+        data: sensorDataset.value.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.humidity}))
+      }
+  ))
+}));
 
-const {lineChartProps: pressureChartProps, lineChartRef: pressureChartRef} = useLineChart({
-  options: {
-    responsive: true,
-    scales: {
-      x: { type: 'timeseries' }
-    },
-    plugins: {
-      title: {
-        display: true,
-        text: 'Tlak'
-      }
-    }
+const pressureChartOptions: ChartOptions<'line'> = {
+  responsive: true,
+  scales: {
+    x: { type: 'timeseries' }
   },
-  chartData: {
-    datasets: discoveredFruits.value.map(fruitIp => (
-        {
-          label: fruitIp,
-          data: sensorDataset.value.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.pressure}))
-        }
-    ))
+  plugins: {
+    title: {
+      display: true,
+      text: 'Tlak'
+    }
   }
-});
+};
+const pressureChartData = computed<ChartData<'line'>>(() => ({
+  datasets: discoveredFruits.value.map(fruitIp => (
+      {
+        label: fruitIp,
+        data: sensorDataset.value.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.pressure}))
+      }
+  ))
+}));
 
-const {lineChartProps: temperatureChartProps, lineChartRef: temperatureChartRef} = useLineChart({
-  options: {
-    responsive: true,
-    scales: {
-      x: { type: 'timeseries' }
-    },
-    plugins: {
-      title: {
-        display: true,
-        text: 'Teplota'
-      }
-    }
+const temperatureChartOptions: ChartOptions<'line'> = {
+  responsive: true,
+  scales: {
+    x: { type: 'timeseries' }
   },
-  chartData: {
-    datasets: discoveredFruits.value.map(fruitIp => (
-        {
-          label: fruitIp,
-          data: sensorDataset.value.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: (d.temperatureFromHumidity + d.temperatureFromPressure) / 2}))
-        }
-    ))
+  plugins: {
+    title: {
+      display: true,
+      text: 'Teplota'
+    }
   }
-});
+};
+const temperatureChartData = computed<ChartData<'line'>>(() => ({
+  datasets: discoveredFruits.value.map(fruitIp => (
+      {
+        label: fruitIp,
+        data: sensorDataset.value.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: (d.temperatureFromPressure + d.temperatureFromHumidity) / 2}))
+      }
+  ))
+}));
 
 const printText = () => {
   socket.emit('PRINT_TEXT', textToSlide.value);

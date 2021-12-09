@@ -1,12 +1,59 @@
+<template>
+  <div class="container">
+    <div class="row">
+      <input type="text" v-model="textToSlide" />
+      <button @click="printText">Send text</button>
+    </div>
+
+    <hr/>
+
+    <div class="row">
+      <LineChart ref="humidityChartRef" :chartData="humidityChartData" :options="humidityChartOptions"></LineChart>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import HelloWorld from './components/HelloWorld.vue'
+import {computed, ComputedRef, reactive, ref, withCtx} from "vue";
 import {io, Socket} from 'socket.io-client';
-import {BrowserToServerEvents, ServerToBrowserEvents} from "fruit-dashboard-server";
-import {ref} from "vue";
+import {Chart, ChartData, ChartOptions, registerables} from 'chart.js';
+import {parseJSON} from 'date-fns';
+import 'chartjs-adapter-date-fns';
+import {ExtractComponentData, LineChart, useLineChart} from "vue-chart-3";
+import {BrowserToServerEvents, NewSensorData, ServerToBrowserEvents} from "fruit-dashboard-server";
+import {reactify} from "@vueuse/core";
+
+Chart.register(...registerables);
 
 const socket: Socket<ServerToBrowserEvents, BrowserToServerEvents> = io('https://vsb-fruit-dashboard.herokuapp.com/web');
+
+const textToSlide = ref("AHOJ");
+const sensorDataset = reactive<NewSensorData[]>([]);
+
+const humidityChartOptions = reactive<ChartOptions<'line'>>({
+  responsive: true,
+  scales: {
+    x: { type: 'timeseries' }
+  },
+  plugins: {
+    title: {
+      display: true,
+      text: 'Vlhkost'
+    }
+  }
+});
+const humidityChartData = computed<ChartData<'line'>>(() => ({
+  datasets: sensorDataset.map(data => (
+      {
+        label: data.fruitIp,
+        data: sensorDataset.filter(d => d.fruitIp === data.fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.humidity}))
+      }
+  ))
+}));
+
+const printText = () => {
+  socket.emit('PRINT_TEXT', textToSlide.value);
+}
 
 socket.on('connect', () => {
   console.log('connected to heroku');
@@ -17,29 +64,9 @@ socket.on('disconnect', () => {
 })
 
 socket.on('NEW_SENSOR_DATA', sensorData => {
-  console.log(sensorData);
+  sensorDataset.push(sensorData);
 });
-
-const textToSlide = ref("AHOJ");
-const printText = () => {
-  socket.emit('PRINT_TEXT', textToSlide.value);
-}
 </script>
 
-<template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <input type="text" v-model="textToSlide" />
-  <button @click="printText">Send text</button>
-  <HelloWorld msg="Hello Vue 3 + TypeScript + Vite" />
-</template>
-
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
 </style>

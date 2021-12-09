@@ -104,13 +104,14 @@ async function main() {
 			console.log(`Got a request to print text ${JSON.stringify(text)} on the fruit boards`);
 
 			const bitmapMatrix = renderPixels(text, fonts.sevenPlus);
+			const fruitsCount = fruits.sockets.size;
 
 			// flip Y by 180 degrees due to inverted displays
 			bitmapMatrix.reverse();
 
 			// pad to fit to 8x8 displays
 			bitmapMatrix.forEach(row => {
-				while (row.length % 8 !== 0) {
+				while (row.length < fruitsCount * 8) {
 					row.push(0);
 				}
 			});
@@ -120,7 +121,7 @@ async function main() {
 				bitmapMatrix.push(row);
 			}
 
-			for (let i = 0; i < fruits.sockets.size * 8; ++i) {
+			for (let i = 0; i < bitmapMatrix[0].length; ++i) {
 				bitmapMatrix.forEach(row => {
 					row.unshift(0);
 				});

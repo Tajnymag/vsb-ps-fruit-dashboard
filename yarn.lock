@@ -165,6 +165,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/date-fns@npm:^2.6.0":
+  version: 2.6.0
+  resolution: "@types/date-fns@npm:2.6.0"
+  dependencies:
+    date-fns: "*"
+  checksum: 6839db1d12d6586cd572e8aa77efc2ea88fd6566b7902641cf3efe2e22518aff067df2ba433539a275a3ab1169612b54d007ddcc2800d846be4f7e629cd7bfb3
+  languageName: node
+  linkType: hard
+
 "@types/express-serve-static-core@npm:^4.17.18":
   version: 4.17.26
   resolution: "@types/express-serve-static-core@npm:4.17.26"
@@ -707,6 +716,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chartjs-adapter-date-fns@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "chartjs-adapter-date-fns@npm:2.0.0"
+  peerDependencies:
+    chart.js: ^3.0.0
+  checksum: 08ee2f99da4a15434e28da733cb0489fe94012ac1a493fbf01d660bcf17df3bb28ce767939c2881b67b3bbefe1a7ffe70dcea4cbd860ab6c2c670d90816e8176
+  languageName: node
+  linkType: hard
+
 "chownr@npm:^2.0.0":
   version: 2.0.0
   resolution: "chownr@npm:2.0.0"
@@ -822,7 +840,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:^2.27.0":
+"date-fns@npm:*, date-fns@npm:^2.27.0":
   version: 2.27.0
   resolution: "date-fns@npm:2.27.0"
   checksum: db62036b3816eb0322c9532b353beac7f660a91e1a55dbd21c14893c621ebb8509f21c66ba287844dabd34dee0207edd54a9537bce6bb7cab9383dedc6b8bc90
@@ -1327,10 +1345,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "fruit-dashboard-web@workspace:packages/fruit-dashboard-web"
   dependencies:
+    "@types/date-fns": ^2.6.0
     "@vitejs/plugin-vue": ^1.9.3
     "@vueuse/core": ^7.1.2
     bootstrap: ^5.1.3
     chart.js: ^3.6.1
+    chartjs-adapter-date-fns: ^2.0.0
+    date-fns: ^2.27.0
     fruit-dashboard-server: "workspace:^"
     socket.io-client: ^4.4.0
     typescript: ^4.4.3

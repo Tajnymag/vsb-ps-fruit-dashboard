@@ -8,20 +8,21 @@
     <hr/>
 
     <div class="row">
-      <LineChart ref="humidityChartRef" :chartData="humidityChartData" :options="humidityChartOptions"></LineChart>
+      <LineChart v-bind="humidityChartProps"/>
+      <LineChart v-bind="pressureChartProps"/>
+      <LineChart v-bind="temperatureChartProps"/>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed, ComputedRef, reactive, ref, withCtx} from "vue";
+import {reactive, ref} from "vue";
 import {io, Socket} from 'socket.io-client';
-import {Chart, ChartData, ChartOptions, registerables} from 'chart.js';
+import {Chart, registerables} from 'chart.js';
 import {parseJSON} from 'date-fns';
 import 'chartjs-adapter-date-fns';
-import {ExtractComponentData, LineChart, useLineChart} from "vue-chart-3";
+import {LineChart, useLineChart} from "vue-chart-3";
 import {BrowserToServerEvents, NewSensorData, ServerToBrowserEvents} from "fruit-dashboard-server";
-import {reactify} from "@vueuse/core";
 
 Chart.register(...registerables);
 
@@ -31,26 +32,74 @@ const textToSlide = ref("AHOJ");
 const sensorDataset = reactive<NewSensorData[]>([]);
 const discoveredFruits = reactive<string[]>([]);
 
-const humidityChartOptions = reactive<ChartOptions<'line'>>({
-  responsive: true,
-  scales: {
-    x: { type: 'timeseries' }
-  },
-  plugins: {
-    title: {
-      display: true,
-      text: 'Vlhkost'
+const {lineChartProps: humidityChartProps, lineChartRef: humidityChartRef} = useLineChart({
+  options: {
+    responsive: true,
+    scales: {
+      x: { type: 'timeseries' }
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: 'Tlak'
+      }
     }
+  },
+  chartData: {
+    datasets: discoveredFruits.map(fruitIp => (
+        {
+          label: fruitIp,
+          data: sensorDataset.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.humidity}))
+        }
+    ))
   }
 });
-const humidityChartData = computed<ChartData<'line'>>(() => ({
-  datasets: discoveredFruits.map(fruitIp => (
-      {
-        label: fruitIp,
-        data: sensorDataset.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.humidity}))
+
+const {lineChartProps: pressureChartProps, lineChartRef: pressureChartRef} = useLineChart({
+  options: {
+    responsive: true,
+    scales: {
+      x: { type: 'timeseries' }
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: 'Tlak'
       }
-  ))
-}));
+    }
+  },
+  chartData: {
+    datasets: discoveredFruits.map(fruitIp => (
+        {
+          label: fruitIp,
+          data: sensorDataset.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.pressure}))
+        }
+    ))
+  }
+});
+
+const {lineChartProps: temperatureChartProps, lineChartRef: temperatureChartRef} = useLineChart({
+  options: {
+    responsive: true,
+    scales: {
+      x: { type: 'timeseries' }
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: 'Teplota'
+      }
+    }
+  },
+  chartData: {
+    datasets: discoveredFruits.map(fruitIp => (
+        {
+          label: fruitIp,
+          data: sensorDataset.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: (d.temperatureFromHumidity + d.temperatureFromPressure) / 2}))
+        }
+    ))
+  }
+});
 
 const printText = () => {
   socket.emit('PRINT_TEXT', textToSlide.value);

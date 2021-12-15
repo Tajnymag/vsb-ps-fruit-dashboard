@@ -29,7 +29,7 @@ const socket: Socket<ServerToBrowserEvents, BrowserToServerEvents> = io('https:/
 const textToSlide = ref("AHOJ");
 const sensorDataset = ref<NewSensorData[]>([]);
 const discoveredFruits = ref<string[]>([]);
-const measurementsLimit = ref(100);
+const measurementsLimit = ref(1000);
 
 const commonChartOptions: ChartOptions<'line'> = {
   responsive: true,

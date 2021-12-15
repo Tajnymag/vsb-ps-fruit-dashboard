@@ -142,7 +142,7 @@ async function main() {
 				const from = to - fruitsCount * 8;
 				const matrixFrame = sliceMatrix(bitmapMatrix, from, to);
 				await printBitmapMatrix(matrixFrame, fruits.sockets.values());
-				await sleep(500);
+				await sleep(100);
 			}
 			currentlyPrinting = false;
 		});

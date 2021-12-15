@@ -14,13 +14,14 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref} from "vue";
+import {computed, reactive, ref} from "vue";
 import {io, Socket} from 'socket.io-client';
 import {Chart, ChartData, ChartOptions, registerables} from 'chart.js';
 import {parseJSON} from 'date-fns';
 import 'chartjs-adapter-date-fns';
-import {LineChart, useLineChart} from "vue-chart-3";
+import {LineChart} from "vue-chart-3";
 import {BrowserToServerEvents, NewSensorData, ServerToBrowserEvents} from "fruit-dashboard-server";
+import {getRandomColor} from "./utils";
 
 Chart.register(...registerables);
 
@@ -29,6 +30,7 @@ const socket: Socket<ServerToBrowserEvents, BrowserToServerEvents> = io('https:/
 const textToSlide = ref("AHOJ");
 const sensorDataset = ref<NewSensorData[]>([]);
 const discoveredFruits = ref<string[]>([]);
+const fruitColorMap = reactive(new Map<string, string>());
 const measurementsLimit = ref(1000);
 
 const commonChartOptions: ChartOptions<'line'> = {
@@ -64,6 +66,7 @@ const humidityChartData = computed<ChartData<'line'>>(() => ({
   datasets: discoveredFruits.value.map(fruitIp => (
       {
         label: fruitIp,
+        borderColor: fruitColorMap.get(fruitIp),
         data: sensorDataset.value.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.humidity}))
       }
   ))
@@ -83,6 +86,7 @@ const pressureChartData = computed<ChartData<'line'>>(() => ({
   datasets: discoveredFruits.value.map(fruitIp => (
       {
         label: fruitIp,
+        borderColor: fruitColorMap.get(fruitIp),
         data: sensorDataset.value.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: d.pressure}))
       }
   ))
@@ -102,6 +106,7 @@ const temperatureChartData = computed<ChartData<'line'>>(() => ({
   datasets: discoveredFruits.value.map(fruitIp => (
       {
         label: fruitIp,
+        borderColor: fruitColorMap.get(fruitIp),
         data: sensorDataset.value.filter(d => d.fruitIp === fruitIp).map(d => ({x: parseJSON(d.measuredAt).valueOf(), y: (d.temperatureFromPressure + d.temperatureFromHumidity) / 2}))
       }
   ))
@@ -126,6 +131,7 @@ socket.on('disconnect', () => {
 socket.on('NEW_SENSOR_DATA', sensorData => {
   if (!discoveredFruits.value.includes(sensorData.fruitIp)) {
     discoveredFruits.value.push(sensorData.fruitIp);
+    fruitColorMap.set(sensorData.fruitIp, getRandomColor());
   }
   sensorDataset.value.push(sensorData);
   sensorDataset.value = sensorDataset.value.filter((_, i, a) => (a.length - i) <= measurementsLimit.value);

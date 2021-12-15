@@ -13,7 +13,7 @@ import {
 	ServerToBrowserEvents,
 	ServerToFruitEvents, Vector2D
 } from "./types";
-import {sleep} from "./utils";
+import {sleep, spliceMatrix} from "./utils";
 import {type} from "os";
 
 const allowedIps = [
@@ -43,7 +43,7 @@ function printBitmapMatrix(bitmapMatrix: (0|1)[][], sockets: IterableIterator<So
 				return;
 			}
 
-			console.log(`Fruit ${fruit.data.fruitIp} priting:\n${coloredPixelArray}`);
+			console.log(`Fruit ${fruit.data.fruitIp} printing:\n${coloredPixelArray}`);
 			fruit.emit('UPDATE_LEDS', coloredPixelArray);
 		});
 }
@@ -117,7 +117,7 @@ async function main() {
 			// flip Y by 180 degrees due to inverted displays
 			bitmapMatrix.reverse();
 
-			// pad columns from left and right
+			// pad columns from right
 			bitmapMatrix.forEach(row => {
 				for (let i = 0; i < fruitsCount * 8; ++i) {
 					row.unshift(0);
@@ -135,11 +135,9 @@ async function main() {
 			}
 
 			currentlyPrinting = true;
-			for (let i = 0; i < rowLength; ++i) {
-				bitmapMatrix.forEach(row => {
-					row.unshift(0);
-				});
-				printBitmapMatrix(bitmapMatrix, fruits.sockets.values());
+			for (let i = 0; i < bitmapMatrix.length - fruitsCount * 8; ++i) {
+				const matrixFrame = spliceMatrix(bitmapMatrix, i, i + fruitsCount * 8);
+				printBitmapMatrix(matrixFrame, fruits.sockets.values());
 				await sleep(500);
 			}
 			currentlyPrinting = false;

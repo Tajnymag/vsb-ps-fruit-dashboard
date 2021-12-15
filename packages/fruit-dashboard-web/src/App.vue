@@ -30,12 +30,31 @@ const textToSlide = ref("AHOJ");
 const sensorDataset = ref<NewSensorData[]>([]);
 const discoveredFruits = ref<string[]>([]);
 
-const humidityChartOptions: ChartOptions<'line'> = {
+const commonChartOptions: ChartOptions<'line'> = {
   responsive: true,
   scales: {
-    x: { type: 'timeseries' }
+    x: {
+      type: 'timeseries',
+      time: {
+        round: 'second',
+        minUnit: 'second'
+      }
+    }
   },
+  spanGaps: true,
   plugins: {
+    decimation: {
+      algorithm: 'min-max',
+      enabled: true
+    },
+
+  }
+}
+
+const humidityChartOptions: ChartOptions<'line'> = {
+  ...commonChartOptions,
+  plugins: {
+    ...commonChartOptions.plugins,
     title: {
       display: true,
       text: 'Vlhkost'
@@ -52,11 +71,9 @@ const humidityChartData = computed<ChartData<'line'>>(() => ({
 }));
 
 const pressureChartOptions: ChartOptions<'line'> = {
-  responsive: true,
-  scales: {
-    x: { type: 'timeseries' }
-  },
+  ...commonChartOptions,
   plugins: {
+    ...commonChartOptions.plugins,
     title: {
       display: true,
       text: 'Tlak'
@@ -73,11 +90,9 @@ const pressureChartData = computed<ChartData<'line'>>(() => ({
 }));
 
 const temperatureChartOptions: ChartOptions<'line'> = {
-  responsive: true,
-  scales: {
-    x: { type: 'timeseries' }
-  },
+  ...commonChartOptions,
   plugins: {
+    ...commonChartOptions.plugins,
     title: {
       display: true,
       text: 'Teplota'

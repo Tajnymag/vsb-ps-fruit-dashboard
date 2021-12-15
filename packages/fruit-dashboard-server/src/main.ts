@@ -24,8 +24,9 @@ const allowedIps = [
 	'158.196.22.222'
 ];
 
-function printBitmapMatrix(bitmapMatrix: (0|1)[][], sockets: IterableIterator<Socket>) {
+async function printBitmapMatrix(bitmapMatrix: (0|1)[][], sockets: IterableIterator<Socket<FruitToServerEvents, ServerToFruitEvents, DefaultEventsMap, FruitSocketData>>): Promise<void> {
 	const coloredMatrix = bitmapMatrix.map(line => line.map(bit => bit ? [255, 255, 255] : [0, 0, 0]));
+	const fruitRequests: Promise<void>[] = [];
 
 	[...sockets]
 		.sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0))
@@ -43,8 +44,10 @@ function printBitmapMatrix(bitmapMatrix: (0|1)[][], sockets: IterableIterator<So
 			}
 
 			console.log(`Fruit ${fruit.data.fruitIp} printing:\n${coloredPixelArray}`);
-			fruit.emit('UPDATE_LEDS', coloredPixelArray);
+			fruitRequests.push(new Promise(resolve => fruit.emit('UPDATE_LEDS', coloredPixelArray, resolve)));
 		});
+
+	await Promise.allSettled(fruitRequests);
 }
 
 async function main() {
@@ -108,6 +111,8 @@ async function main() {
 			if (currentlyPrinting) {
 				console.warn(`Skipping current print request as there's another print jobs running!`);
 				return;
+			} else {
+				currentlyPrinting = true;
 			}
 
 			const bitmapMatrix = renderPixels(text, fonts.sevenPlus);
@@ -133,11 +138,10 @@ async function main() {
 				bitmapMatrix.push(row);
 			}
 
-			currentlyPrinting = true;
 			for (let to = rowLength; to >= fruitsCount * 8; --to) {
 				const from = to - fruitsCount * 8;
 				const matrixFrame = sliceMatrix(bitmapMatrix, from, to);
-				printBitmapMatrix(matrixFrame, fruits.sockets.values());
+				await printBitmapMatrix(matrixFrame, fruits.sockets.values());
 				await sleep(500);
 			}
 			currentlyPrinting = false;

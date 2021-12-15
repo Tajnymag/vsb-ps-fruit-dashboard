@@ -34,10 +34,11 @@ async function main() {
 			}
 		}, 2000);
 
-		socket.on('UPDATE_LEDS', async leds => {
+		socket.on('UPDATE_LEDS', async (leds, done) => {
 			try {
 				console.log(`Updating leds...`);
 				await senseHatCli.updateLeds(leds);
+				done();
 				console.log(`Leds updated successfully`);
 			} catch (err) {
 				console.error(`Failed to update leds display`);

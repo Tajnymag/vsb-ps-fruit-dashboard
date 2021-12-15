@@ -22,7 +22,7 @@ export interface FruitToServerEvents {
 }
 
 export interface ServerToFruitEvents {
-	UPDATE_LEDS: (leds: number[]) => void;
+	UPDATE_LEDS: (leds: number[], callback: () => void) => void;
 }
 
 export interface FruitSocketData {

@@ -29,6 +29,7 @@ const socket: Socket<ServerToBrowserEvents, BrowserToServerEvents> = io('https:/
 const textToSlide = ref("AHOJ");
 const sensorDataset = ref<NewSensorData[]>([]);
 const discoveredFruits = ref<string[]>([]);
+const measurementsLimit = ref(100);
 
 const commonChartOptions: ChartOptions<'line'> = {
   responsive: true,
@@ -127,6 +128,7 @@ socket.on('NEW_SENSOR_DATA', sensorData => {
     discoveredFruits.value.push(sensorData.fruitIp);
   }
   sensorDataset.value.push(sensorData);
+  sensorDataset.value = sensorDataset.value.filter((_, i, a) => (a.length - i) <= measurementsLimit.value);
 });
 </script>
 

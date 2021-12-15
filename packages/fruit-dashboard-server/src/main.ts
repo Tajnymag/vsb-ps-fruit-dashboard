@@ -1,5 +1,5 @@
 import {createServer} from "http";
-import {PrismaClient} from '@prisma/client';
+import {PrismaClient, Prisma} from '@prisma/client';
 import {DefaultEventsMap} from "socket.io/dist/typed-events";
 import {Namespace, Server, Socket} from 'socket.io';
 import {subHours, subSeconds} from 'date-fns'
@@ -9,11 +9,12 @@ import {fonts, renderPixels} from "js-pixel-fonts";
 import {
 	BrowserToServerEvents,
 	FruitSocketData,
-	FruitToServerEvents,
+	FruitToServerEvents, NewSensorData,
 	ServerToBrowserEvents,
-	ServerToFruitEvents
+	ServerToFruitEvents, Vector2D
 } from "./types";
 import {sleep} from "./utils";
+import {type} from "os";
 
 const allowedIps = [
 	'158.196.22.216',
@@ -61,6 +62,8 @@ async function main() {
 	const fruits: Namespace<FruitToServerEvents, ServerToFruitEvents, DefaultEventsMap, FruitSocketData> = socketServer.of('fruit');
 	const browsers: Namespace<BrowserToServerEvents, ServerToBrowserEvents> = socketServer.of('web');
 
+	let currentlyPrinting = false;
+
 	fruits.on('connection', socket => {
 		const fruitIp = socket.handshake.query.fruitIp;
 
@@ -103,33 +106,63 @@ async function main() {
 		socket.on('PRINT_TEXT', async text => {
 			console.log(`Got a request to print text ${JSON.stringify(text)} on the fruit boards`);
 
+			if (currentlyPrinting) {
+				console.warn(`Skipping current print request as there's another print jobs running!`);
+				return;
+			}
+
 			const bitmapMatrix = renderPixels(text, fonts.sevenPlus);
 			const fruitsCount = fruits.sockets.size;
 
 			// flip Y by 180 degrees due to inverted displays
 			bitmapMatrix.reverse();
 
-			// pad to fit to 8x8 displays
+			// pad columns from left and right
 			bitmapMatrix.forEach(row => {
-				while (row.length < fruitsCount * 8) {
+				for (let i = 0; i < fruitsCount * 8; ++i) {
+					row.unshift(0);
 					row.push(0);
 				}
 			});
 
 			const rowLength = bitmapMatrix[0].length;
 
+			// pad rows
 			while (bitmapMatrix.length % 8 !== 0) {
 				const row: 0[] = [];
 				for (let i = 0; i < rowLength; ++i) row.push(0);
 				bitmapMatrix.push(row);
 			}
 
+			currentlyPrinting = true;
 			for (let i = 0; i < rowLength; ++i) {
 				bitmapMatrix.forEach(row => {
 					row.unshift(0);
 				});
 				printBitmapMatrix(bitmapMatrix, fruits.sockets.values());
-				await sleep(1000);
+				await sleep(500);
+			}
+			currentlyPrinting = false;
+		});
+
+		socket.on('GET_SENSOR_DATA', async (cb) => {
+			try {
+				const measurements = await prisma.measurement.findMany();
+
+				return cb(measurements.map(m => ({
+					humidity: m.humidity.toNumber(),
+					fruitIp: m.fruitIp,
+					measuredAt: m.measuredAt,
+					temperatureFromPressure: m.temperatureFromPressure.toNumber(),
+					temperatureFromHumidity: m.temperatureFromHumidity.toNumber(),
+					pressure: m.pressure.toNumber(),
+					angularRate: <unknown>m.angularRate as Vector2D,
+					linearAcceleration: <unknown>m.linearAcceleration as Vector2D,
+					magneticField: <unknown>m.magneticField as Vector2D
+				})));
+			} catch (err) {
+				console.error(`Failed to fetch archived sensor data`);
+				console.error(err);
 			}
 		});
 	});

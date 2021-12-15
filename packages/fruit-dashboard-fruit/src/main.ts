@@ -42,7 +42,7 @@ async function main() {
 			} catch (err) {
 				console.error(`Failed to update leds display`);
 			}
-		})
+		});
 	});
 
 	socket.on('disconnect', () => {

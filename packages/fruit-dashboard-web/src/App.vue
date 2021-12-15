@@ -1,11 +1,9 @@
 <template>
   <div class="container">
-    <div class="row">
-      <input type="text" v-model="textToSlide" />
-      <button @click="printText">Send text</button>
+    <div class="input-group">
+      <input type="text" class="form-control" v-model="textToSlide" />
+      <button type="button" class="btn btn-primary" @click="printText">Send text</button>
     </div>
-
-    <hr/>
 
     <div class="row">
       <LineChart :options="humidityChartOptions" :chartData="humidityChartData"/>
@@ -101,6 +99,10 @@ const printText = () => {
 
 socket.on('connect', () => {
   console.log('connected to heroku');
+
+  socket.emit('GET_SENSOR_DATA', sensorData => {
+    sensorDataset.value = [...sensorDataset.value, ...sensorData];
+  });
 });
 
 socket.on('disconnect', () => {

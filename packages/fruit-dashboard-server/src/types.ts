@@ -32,6 +32,7 @@ export interface FruitSocketData {
 
 export interface BrowserToServerEvents {
 	PRINT_TEXT: (text: string) => void;
+	GET_SENSOR_DATA: (cb: (sensorData: NewSensorData[]) => void) => void;
 }
 
 export interface ServerToBrowserEvents {

@@ -1,5 +1,5 @@
 import {createServer} from "http";
-import {PrismaClient, Prisma} from '@prisma/client';
+import {PrismaClient} from '@prisma/client';
 import {DefaultEventsMap} from "socket.io/dist/typed-events";
 import {Namespace, Server, Socket} from 'socket.io';
 import {subHours, subSeconds} from 'date-fns'

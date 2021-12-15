@@ -27,11 +27,14 @@ export function createMatrix2D<T extends unknown>(rows: number, cols: number, de
 }
 
 export function sliceMatrix<T extends unknown>(matrix: T[][], colFrom: number, colTo?: number): T[][] {
-	colTo = colTo ? colTo + 1 : matrix[0].length;
+	colTo = colTo ? colTo : matrix[0].length;
+
+	if (colTo < colFrom) throw new SyntaxError(`colTo must be greater than colFrom!`);
+
 	const splicedMatrix = createMatrix2D(matrix.length, colTo - colFrom, matrix[0][0]);
 
 	for (let rowIndex = 0; rowIndex < splicedMatrix.length; ++rowIndex) {
-		for (let colIndex = colFrom; colIndex < splicedMatrix[0].length; ++colIndex) {
+		for (let colIndex = 0; colIndex < splicedMatrix[0].length; ++colIndex) {
 			splicedMatrix[rowIndex][colIndex] = matrix[rowIndex][colIndex + colFrom];
 		}
 	}

@@ -36,8 +36,7 @@ const commonChartOptions: ChartOptions<'line'> = {
     x: {
       type: 'timeseries',
       time: {
-        round: 'second',
-        minUnit: 'second'
+        round: 'second'
       }
     }
   },
@@ -47,7 +46,6 @@ const commonChartOptions: ChartOptions<'line'> = {
       algorithm: 'min-max',
       enabled: true
     },
-
   }
 }
 

@@ -118,10 +118,6 @@ const printText = () => {
 
 socket.on('connect', () => {
   console.log('connected to heroku');
-
-  socket.emit('GET_SENSOR_DATA', sensorData => {
-    sensorDataset.value = [...sensorDataset.value, ...sensorData];
-  });
 });
 
 socket.on('disconnect', () => {

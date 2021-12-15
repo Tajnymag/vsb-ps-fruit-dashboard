@@ -26,8 +26,9 @@ export function createMatrix2D<T extends unknown>(rows: number, cols: number, de
 	return matrix;
 }
 
-export function spliceMatrix<T extends unknown>(matrix: T[][], colFrom: number, colTo?: number): T[][] {
-	const splicedMatrix = createMatrix2D(matrix.length, (colTo || matrix[0].length) - colFrom, matrix[0][0]);
+export function sliceMatrix<T extends unknown>(matrix: T[][], colFrom: number, colTo?: number): T[][] {
+	colTo = colTo ? colTo + 1 : matrix[0].length;
+	const splicedMatrix = createMatrix2D(matrix.length, colTo - colFrom, matrix[0][0]);
 
 	for (let rowIndex = 0; rowIndex < splicedMatrix.length; ++rowIndex) {
 		for (let colIndex = colFrom; colIndex < splicedMatrix[0].length; ++colIndex) {

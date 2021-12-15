@@ -9,12 +9,11 @@ import {fonts, renderPixels} from "js-pixel-fonts";
 import {
 	BrowserToServerEvents,
 	FruitSocketData,
-	FruitToServerEvents, NewSensorData,
+	FruitToServerEvents,
 	ServerToBrowserEvents,
 	ServerToFruitEvents, Vector2D
 } from "./types";
-import {sleep, spliceMatrix} from "./utils";
-import {type} from "os";
+import {sleep, sliceMatrix} from "./utils";
 
 const allowedIps = [
 	'158.196.22.216',
@@ -135,8 +134,9 @@ async function main() {
 			}
 
 			currentlyPrinting = true;
-			for (let i = 0; i < bitmapMatrix.length - fruitsCount * 8; ++i) {
-				const matrixFrame = spliceMatrix(bitmapMatrix, i, i + fruitsCount * 8);
+			for (let to = rowLength; to >= fruitsCount * 8; --to) {
+				const from = to - fruitsCount * 8;
+				const matrixFrame = sliceMatrix(bitmapMatrix, from, to);
 				printBitmapMatrix(matrixFrame, fruits.sockets.values());
 				await sleep(500);
 			}
